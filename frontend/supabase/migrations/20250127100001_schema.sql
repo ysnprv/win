@@ -117,7 +117,7 @@ CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
 BEGIN
     INSERT INTO public.profiles (id, email, name, is_verified)
@@ -160,14 +160,14 @@ BEGIN
     RETURN NEW;
 END;
 $$
-SET search_path = public, pg_catalog;
+SET search_path = pg_catalog, public;
 
 -- Update last_login and is_verified when auth.users changes
 CREATE OR REPLACE FUNCTION public.update_last_login()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
 BEGIN
     -- Update last_login when user signs in (last_sign_in_at changes)
@@ -197,7 +197,7 @@ CREATE OR REPLACE FUNCTION public.cleanup_deactivated_accounts()
 RETURNS INTEGER
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = pg_catalog, public
 AS $$
 DECLARE
     deleted_count INTEGER := 0;
@@ -420,7 +420,8 @@ BEGIN
     NEW.updated_at = NOW();
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql
+SET search_path = pg_catalog, public;
 
 -- =====================================================================
 -- TRIGGERS FOR CAREER GUIDES
@@ -537,7 +538,8 @@ BEGIN
     NEW.updated_at = NOW();
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql
+SET search_path = pg_catalog, public;
 
 -- =====================================================================
 -- TRIGGERS FOR INTERVIEWS
