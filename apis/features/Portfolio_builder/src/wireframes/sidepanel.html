@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Wireframe - Side Navigation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            background: #fafafa;
+        }
+        
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 280px;
+            background: #fff;
+            border-right: 1px solid #e0e0e0;
+            padding: 40px 30px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        
+        .profile-section {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .profile-image {
+            width: 120px;
+            height: 120px;
+            background: #ddd;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+        }
+        
+        .profile-name {
+            height: 28px;
+            background: #e0e0e0;
+            margin-bottom: 12px;
+        }
+        
+        .profile-title {
+            height: 20px;
+            background: #e8e8e8;
+        }
+        
+        .nav-menu {
+            margin-bottom: 40px;
+        }
+        
+        .nav-item {
+            height: 40px;
+            background: #f0f0f0;
+            margin-bottom: 10px;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .social-item {
+            width: 40px;
+            height: 40px;
+            background: #e0e0e0;
+            border-radius: 50%;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 60px 80px;
+        }
+        
+        .section {
+            margin-bottom: 80px;
+        }
+        
+        .section-header {
+            margin-bottom: 40px;
+        }
+        
+        .section-title {
+            height: 36px;
+            background: #e0e0e0;
+            margin-bottom: 15px;
+            max-width: 300px;
+        }
+        
+        .section-subtitle {
+            height: 20px;
+            background: #e8e8e8;
+            max-width: 450px;
+        }
+        
+        /* Hero Content */
+        .hero-content {
+            margin-bottom: 40px;
+        }
+        
+        .hero-text {
+            height: 150px;
+            background: #f0f0f0;
+            margin-bottom: 30px;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .cta-button {
+            width: 140px;
+            height: 50px;
+            background: #e0e0e0;
+        }
+        
+        /* Stats Bar */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 30px;
+            background: #fff;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .stat-number {
+            height: 40px;
+            background: #e0e0e0;
+            margin-bottom: 15px;
+        }
+        
+        .stat-label {
+            height: 20px;
+            background: #e8e8e8;
+        }
+        
+        /* Two Column Layout */
+        .two-column {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+        }
+        
+        .column-card {
+            background: #fff;
+            padding: 40px;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .card-title {
+            height: 28px;
+            background: #e0e0e0;
+            margin-bottom: 20px;
+        }
+        
+        .card-content {
+            height: 100px;
+            background: #f0f0f0;
+            margin-bottom: 15px;
+        }
+        
+        /* List Items */
+        .list-item {
+            background: #fff;
+            padding: 30px;
+            margin-bottom: 20px;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .item-title {
+            height: 24px;
+            background: #e0e0e0;
+            flex: 1;
+            margin-right: 20px;
+        }
+        
+        .item-date {
+            height: 24px;
+            background: #e8e8e8;
+            width: 120px;
+        }
+        
+        .item-subtitle {
+            height: 20px;
+            background: #e8e8e8;
+            max-width: 250px;
+            margin-bottom: 15px;
+        }
+        
+        .item-description {
+            height: 60px;
+            background: #f0f0f0;
+        }
+        
+        /* Gallery Grid */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 25px;
+        }
+        
+        .gallery-item {
+            aspect-ratio: 4/3;
+            background: #e0e0e0;
+            border: 2px solid #d0d0d0;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 240px;
+            }
+            
+            .main-content {
+                margin-left: 240px;
+                padding: 40px 40px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .layout {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                position: static;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid #e0e0e0;
+                padding: 30px 20px;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 40px 20px;
+            }
+            
+            .section {
+                margin-bottom: 60px;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+            }
+            
+            .cta-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="profile-section">
+                <div class="profile-image"></div>
+                <div class="profile-name"></div>
+                <div class="profile-title"></div>
+            </div>
+            
+            <nav class="nav-menu">
+                <div class="nav-item"></div>
+                <div class="nav-item"></div>
+                <div class="nav-item"></div>
+                <div class="nav-item"></div>
+                <div class="nav-item"></div>
+            </nav>
+            
+            <div class="social-links">
+                <div class="social-item"></div>
+                <div class="social-item"></div>
+                <div class="social-item"></div>
+                <div class="social-item"></div>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Hero Section -->
+            <section class="section">
+                <div class="hero-content">
+                    <div class="hero-text"></div>
+                    <div class="cta-buttons">
+                        <div class="cta-button"></div>
+                        <div class="cta-button"></div>
+                    </div>
+                </div>
+                <div class="stats-bar">
+                    <div class="stat-item">
+                        <div class="stat-number"></div>
+                        <div class="stat-label"></div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number"></div>
+                        <div class="stat-label"></div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number"></div>
+                        <div class="stat-label"></div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number"></div>
+                        <div class="stat-label"></div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- About Section -->
+            <section class="section">
+                <div class="section-header">
+                    <div class="section-title"></div>
+                    <div class="section-subtitle"></div>
+                </div>
+                <div class="two-column">
+                    <div class="column-card">
+                        <div class="card-title"></div>
+                        <div class="card-content"></div>
+                        <div class="card-content"></div>
+                    </div>
+                    <div class="column-card">
+                        <div class="card-title"></div>
+                        <div class="card-content"></div>
+                        <div class="card-content"></div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Experience Section -->
+            <section class="section">
+                <div class="section-header">
+                    <div class="section-title"></div>
+                    <div class="section-subtitle"></div>
+                </div>
+                <div class="list-item">
+                    <div class="item-header">
+                        <div class="item-title"></div>
+                        <div class="item-date"></div>
+                    </div>
+                    <div class="item-subtitle"></div>
+                    <div class="item-description"></div>
+                </div>
+                <div class="list-item">
+                    <div class="item-header">
+                        <div class="item-title"></div>
+                        <div class="item-date"></div>
+                    </div>
+                    <div class="item-subtitle"></div>
+                    <div class="item-description"></div>
+                </div>
+                <div class="list-item">
+                    <div class="item-header">
+                        <div class="item-title"></div>
+                        <div class="item-date"></div>
+                    </div>
+                    <div class="item-subtitle"></div>
+                    <div class="item-description"></div>
+                </div>
+            </section>
+            
+            <!-- Projects Gallery -->
+            <section class="section">
+                <div class="section-header">
+                    <div class="section-title"></div>
+                    <div class="section-subtitle"></div>
+                </div>
+                <div class="gallery-grid">
+                    <div class="gallery-item"></div>
+                    <div class="gallery-item"></div>
+                    <div class="gallery-item"></div>
+                    <div class="gallery-item"></div>
+                    <div class="gallery-item"></div>
+                    <div class="gallery-item"></div>
+                </div>
+            </section>
+            
+            <!-- Contact Section -->
+            <section class="section">
+                <div class="section-header">
+                    <div class="section-title"></div>
+                    <div class="section-subtitle"></div>
+                </div>
+                <div class="two-column">
+                    <div class="column-card">
+                        <div class="card-content"></div>
+                    </div>
+                    <div class="column-card">
+                        <div class="card-content"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

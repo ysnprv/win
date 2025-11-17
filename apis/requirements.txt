@@ -1,0 +1,52 @@
+# Web framework
+fastapi
+uvicorn
+python-multipart
+
+# HTTP clients
+aiohttp
+httpx
+requests
+
+# Realtime & WebSocket
+nest_asyncio
+websockets
+
+# AI / ML libraries
+--extra-index-url https://download.pytorch.org/whl/cpu
+easyocr
+torch
+transformers
+
+# LLM providers
+groq
+langchain
+langchain-cerebras
+langchain-google-genai
+langchain-openai
+openai
+ollama
+
+# Database
+chromadb
+supabase
+
+# Document parsing
+charset-normalizer
+docling
+
+# PDF generation
+fpdf2
+pylatex
+
+# STT / TTS
+elevenlabs
+soundfile
+
+# Data validation
+pydantic
+pydantic-settings
+
+# Utilities
+hf_xet
+numpy

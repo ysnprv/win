@@ -1,0 +1,224 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    /* Font families */
+    --font-family-sf-pro: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', system-ui, 'Segoe UI', sans-serif;
+    --font-family-montserrat: var(--font-montserrat), 'Montserrat', system-ui, sans-serif;
+    --font-family-neue-montreal: var(--font-neue-montreal), 'Inter', system-ui, sans-serif;
+    
+    /* Semantic font families */
+    --font-family-nav: var(--font-family-sf-pro);
+    --font-family-label: var(--font-family-sf-pro);
+    --font-family-heading: var(--font-family-montserrat);
+    --font-family-cta: var(--font-family-montserrat);
+    --font-family-body: var(--font-family-neue-montreal);
+    --font-family-list: var(--font-family-neue-montreal);
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+    --radius: 0.625rem;
+    /* Light mode with enhanced blue theme and gray depth */
+    --background: oklch(0.94 0.015 240);
+    --foreground: oklch(0.22 0.03 250);
+    --card: oklch(0.98 0.012 240);
+    --card-foreground: oklch(0.22 0.03 250);
+    --popover: oklch(0.99 0.008 240);
+    --popover-foreground: oklch(0.22 0.03 250);
+    --primary: oklch(0.48 0.18 250);
+    --primary-foreground: oklch(0.99 0.002 240);
+    --secondary: oklch(0.88 0.018 240);
+    --secondary-foreground: oklch(0.32 0.04 250);
+    --muted: oklch(0.90 0.015 240);
+    --muted-foreground: oklch(0.48 0.025 250);
+    --accent: oklch(0.52 0.14 250);
+    --accent-foreground: oklch(0.99 0.002 240);
+    --destructive: oklch(0.577 0.245 27.325);
+    --border: oklch(0.84 0.02 240);
+    --input: oklch(0.88 0.018 240);
+    --ring: oklch(0.55 0.14 250);
+    --chart-1: oklch(0.55 0.16 250);
+    --chart-2: oklch(0.6 0.118 184.704);
+    --chart-3: oklch(0.48 0.14 250);
+    --chart-4: oklch(0.828 0.189 84.429);
+    --chart-5: oklch(0.769 0.188 70.08);
+    --sidebar: oklch(0.97 0.01 240);
+    --sidebar-foreground: oklch(0.28 0.03 250);
+    --sidebar-primary: oklch(0.50 0.16 250);
+    --sidebar-primary-foreground: oklch(0.99 0.002 240);
+    --sidebar-accent: oklch(0.89 0.015 240);
+    --sidebar-accent-foreground: oklch(0.32 0.04 250);
+    --sidebar-border: oklch(0.83 0.02 240);
+    --sidebar-ring: oklch(0.55 0.14 250);
+}
+
+/* Font utility classes */
+.font-sf-pro {
+    font-family: var(--font-sf-pro), -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+}
+
+.font-montserrat {
+    font-family: var(--font-montserrat), 'Montserrat', system-ui, sans-serif;
+}
+
+.font-neue-montreal {
+    font-family: var(--font-neue-montreal), 'Neue Montreal', system-ui, sans-serif;
+}
+
+/* Semantic font classes */
+.font-nav {
+    font-family: var(--font-sf-pro), -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+
+.font-label {
+    font-family: var(--font-sf-pro), -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+
+.font-heading {
+    font-family: var(--font-montserrat), 'Montserrat', system-ui, sans-serif;
+}
+
+.font-cta {
+    font-family: var(--font-montserrat), 'Montserrat', system-ui, sans-serif;
+}
+
+.font-body {
+    font-family: var(--font-neue-montreal), 'Neue Montreal', system-ui, sans-serif;
+}
+
+.font-list {
+    font-family: var(--font-neue-montreal), 'Neue Montreal', system-ui, sans-serif;
+}
+
+.dark {
+    /* Dark mode with deep blue theme */
+    --background: oklch(0.15 0.025 250);
+    --foreground: oklch(0.95 0.005 240);
+    --card: oklch(0.2 0.03 250);
+    --card-foreground: oklch(0.95 0.005 240);
+    --popover: oklch(0.2 0.03 250);
+    --popover-foreground: oklch(0.95 0.005 240);
+    --primary: oklch(0.55 0.15 250);
+    --primary-foreground: oklch(0.98 0.002 240);
+    --secondary: oklch(0.28 0.03 250);
+    --secondary-foreground: oklch(0.95 0.005 240);
+    --muted: oklch(0.25 0.025 250);
+    --muted-foreground: oklch(0.65 0.02 250);
+    --accent: oklch(0.5 0.14 250);
+    --accent-foreground: oklch(0.98 0.002 240);
+    --destructive: oklch(0.704 0.191 22.216);
+    --border: oklch(0.3 0.03 250);
+    --input: oklch(0.28 0.03 250);
+    --ring: oklch(0.55 0.12 250);
+    --chart-1: oklch(0.55 0.15 250);
+    --chart-2: oklch(0.696 0.17 162.48);
+    --chart-3: oklch(0.48 0.13 250);
+    --chart-4: oklch(0.627 0.265 303.9);
+    --chart-5: oklch(0.645 0.246 16.439);
+    --sidebar: oklch(0.18 0.028 250);
+    --sidebar-foreground: oklch(0.95 0.005 240);
+    --sidebar-primary: oklch(0.52 0.14 250);
+    --sidebar-primary-foreground: oklch(0.98 0.002 240);
+    --sidebar-accent: oklch(0.26 0.03 250);
+    --sidebar-accent-foreground: oklch(0.95 0.005 240);
+    --sidebar-border: oklch(0.3 0.03 250);
+    --sidebar-ring: oklch(0.55 0.12 250);
+}
+
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
+    }
+    body {
+        @apply bg-background text-foreground;
+    }
+    :root {
+        --sidebar: oklch(0.98 0.002 240);
+        --sidebar-foreground: oklch(0.25 0.02 250);
+        --sidebar-primary: oklch(0.48 0.14 250);
+        --sidebar-primary-foreground: oklch(0.99 0.001 240);
+        --sidebar-accent: oklch(0.93 0.004 240);
+        --sidebar-accent-foreground: oklch(0.3 0.03 250);
+        --sidebar-border: oklch(0.87 0.005 240);
+        --sidebar-ring: oklch(0.55 0.12 250);
+    }
+
+    .dark {
+        --sidebar: oklch(0.18 0.028 250);
+        --sidebar-foreground: oklch(0.95 0.005 240);
+        --sidebar-primary: oklch(0.52 0.14 250);
+        --sidebar-primary-foreground: oklch(0.98 0.002 240);
+        --sidebar-accent: oklch(0.26 0.03 250);
+        --sidebar-accent-foreground: oklch(0.95 0.005 240);
+        --sidebar-border: oklch(0.3 0.03 250);
+        --sidebar-ring: oklch(0.55 0.12 250);
+    }
+}
+
+@layer utilities {
+    .animate-float-slow {
+        animation: floatY 6s ease-in-out infinite;
+    }
+
+    .animate-drift-slow {
+        animation: driftX 9s ease-in-out infinite;
+    }
+
+    .animate-landing-gradient {
+        animation: landingGradient 10s linear infinite;
+    }
+
+    @keyframes floatY {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    @keyframes driftX {
+        0% { transform: translateX(0) scale(1); }
+        50% { transform: translateX(12px) scale(1.03); }
+        100% { transform: translateX(0) scale(1); }
+    }
+
+    @keyframes landingGradient {
+        0% { filter: hue-rotate(0deg); }
+        50% { filter: hue-rotate(12deg); }
+        100% { filter: hue-rotate(0deg); }
+    }
+}

@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Wireframe - Minimal Cards</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            background: #fff;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 60px 30px;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 60px 0 80px;
+            border-bottom: 2px solid #e0e0e0;
+            margin-bottom: 60px;
+        }
+        
+        .profile-photo {
+            width: 100px;
+            height: 100px;
+            background: #e0e0e0;
+            border-radius: 50%;
+            margin: 0 auto 30px;
+        }
+        
+        .header-title {
+            height: 36px;
+            background: #e0e0e0;
+            max-width: 350px;
+            margin: 0 auto 15px;
+        }
+        
+        .header-subtitle {
+            height: 24px;
+            background: #e8e8e8;
+            max-width: 400px;
+            margin: 0 auto 30px;
+        }
+        
+        .header-links {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 35px;
+        }
+        
+        .header-link {
+            width: 100px;
+            height: 36px;
+            background: #e8e8e8;
+        }
+        
+        /* Simple Card */
+        .card {
+            background: #fafafa;
+            border: 2px solid #e0e0e0;
+            padding: 50px;
+            margin-bottom: 40px;
+        }
+        
+        .card-label {
+            height: 16px;
+            background: #d0d0d0;
+            max-width: 100px;
+            margin-bottom: 20px;
+        }
+        
+        .card-heading {
+            height: 32px;
+            background: #e0e0e0;
+            max-width: 300px;
+            margin-bottom: 30px;
+        }
+        
+        .card-content {
+            height: 90px;
+            background: #e8e8e8;
+            margin-bottom: 20px;
+        }
+        
+        /* Skills Pills */
+        .pills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 25px;
+        }
+        
+        .pill {
+            height: 36px;
+            width: 100px;
+            background: #e0e0e0;
+        }
+        
+        /* Timeline Item */
+        .timeline-item {
+            padding: 40px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .timeline-item:last-child {
+            border-bottom: none;
+        }
+        
+        .timeline-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .timeline-title {
+            height: 28px;
+            background: #e0e0e0;
+            max-width: 280px;
+        }
+        
+        .timeline-date {
+            height: 20px;
+            background: #e8e8e8;
+            width: 120px;
+        }
+        
+        .timeline-subtitle {
+            height: 20px;
+            background: #e8e8e8;
+            max-width: 220px;
+            margin-bottom: 20px;
+        }
+        
+        .timeline-description {
+            height: 70px;
+            background: #f0f0f0;
+        }
+        
+        /* Project Item */
+        .project-item {
+            padding: 40px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .project-item:last-child {
+            border-bottom: none;
+        }
+        
+        .project-title {
+            height: 28px;
+            background: #e0e0e0;
+            max-width: 300px;
+            margin-bottom: 20px;
+        }
+        
+        .project-description {
+            height: 80px;
+            background: #f0f0f0;
+            margin-bottom: 20px;
+        }
+        
+        .project-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .project-tags {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .project-tag {
+            height: 28px;
+            width: 75px;
+            background: #e8e8e8;
+        }
+        
+        .project-link {
+            height: 32px;
+            width: 90px;
+            background: #e0e0e0;
+        }
+        
+        /* Contact Card */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .contact-icon {
+            width: 50px;
+            height: 50px;
+            background: #e0e0e0;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+        
+        .contact-text {
+            height: 24px;
+            background: #e8e8e8;
+            flex: 1;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 60px 0 20px;
+            margin-top: 60px;
+            border-top: 2px solid #e0e0e0;
+        }
+        
+        .footer-text {
+            height: 20px;
+            background: #e8e8e8;
+            max-width: 250px;
+            margin: 0 auto;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 20px;
+            }
+            
+            .header {
+                padding: 40px 0 60px;
+            }
+            
+            .card {
+                padding: 35px 25px;
+            }
+            
+            .header-links {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+            
+            .header-link {
+                width: 100%;
+                max-width: 200px;
+            }
+            
+            .timeline-meta {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .timeline-date {
+                width: 100px;
+            }
+            
+            .project-footer {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .contact-grid {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+            
+            .pills-container {
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="profile-photo"></div>
+            <div class="header-title"></div>
+            <div class="header-subtitle"></div>
+            <div class="header-links">
+                <div class="header-link"></div>
+                <div class="header-link"></div>
+                <div class="header-link"></div>
+            </div>
+        </header>
+        
+        <!-- About Card -->
+        <section class="card">
+            <div class="card-label"></div>
+            <div class="card-heading"></div>
+            <div class="card-content"></div>
+            <div class="card-content"></div>
+        </section>
+        
+        <!-- Skills Card -->
+        <section class="card">
+            <div class="card-label"></div>
+            <div class="card-heading"></div>
+            <div class="pills-container">
+                <div class="pill"></div>
+                <div class="pill"></div>
+                <div class="pill"></div>
+                <div class="pill"></div>
+                <div class="pill"></div>
+                <div class="pill"></div>
+                <div class="pill"></div>
+                <div class="pill"></div>
+            </div>
+        </section>
+        
+        <!-- Experience Card -->
+        <section class="card">
+            <div class="card-label"></div>
+            <div class="card-heading"></div>
+            
+            <div class="timeline-item">
+                <div class="timeline-meta">
+                    <div class="timeline-title"></div>
+                    <div class="timeline-date"></div>
+                </div>
+                <div class="timeline-subtitle"></div>
+                <div class="timeline-description"></div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-meta">
+                    <div class="timeline-title"></div>
+                    <div class="timeline-date"></div>
+                </div>
+                <div class="timeline-subtitle"></div>
+                <div class="timeline-description"></div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-meta">
+                    <div class="timeline-title"></div>
+                    <div class="timeline-date"></div>
+                </div>
+                <div class="timeline-subtitle"></div>
+                <div class="timeline-description"></div>
+            </div>
+        </section>
+        
+        <!-- Projects Card -->
+        <section class="card">
+            <div class="card-label"></div>
+            <div class="card-heading"></div>
+            
+            <div class="project-item">
+                <div class="project-title"></div>
+                <div class="project-description"></div>
+                <div class="project-footer">
+                    <div class="project-tags">
+                        <div class="project-tag"></div>
+                        <div class="project-tag"></div>
+                        <div class="project-tag"></div>
+                    </div>
+                    <div class="project-link"></div>
+                </div>
+            </div>
+            
+            <div class="project-item">
+                <div class="project-title"></div>
+                <div class="project-description"></div>
+                <div class="project-footer">
+                    <div class="project-tags">
+                        <div class="project-tag"></div>
+                        <div class="project-tag"></div>
+                        <div class="project-tag"></div>
+                    </div>
+                    <div class="project-link"></div>
+                </div>
+            </div>
+            
+            <div class="project-item">
+                <div class="project-title"></div>
+                <div class="project-description"></div>
+                <div class="project-footer">
+                    <div class="project-tags">
+                        <div class="project-tag"></div>
+                        <div class="project-tag"></div>
+                        <div class="project-tag"></div>
+                    </div>
+                    <div class="project-link"></div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Education Card -->
+        <section class="card">
+            <div class="card-label"></div>
+            <div class="card-heading"></div>
+            
+            <div class="timeline-item">
+                <div class="timeline-meta">
+                    <div class="timeline-title"></div>
+                    <div class="timeline-date"></div>
+                </div>
+                <div class="timeline-subtitle"></div>
+                <div class="timeline-description"></div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-meta">
+                    <div class="timeline-title"></div>
+                    <div class="timeline-date"></div>
+                </div>
+                <div class="timeline-subtitle"></div>
+                <div class="timeline-description"></div>
+            </div>
+        </section>
+        
+        <!-- Contact Card -->
+        <section class="card">
+            <div class="card-label"></div>
+            <div class="card-heading"></div>
+            <div class="contact-grid">
+                <div class="contact-item">
+                    <div class="contact-icon"></div>
+                    <div class="contact-text"></div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon"></div>
+                    <div class="contact-text"></div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon"></div>
+                    <div class="contact-text"></div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon"></div>
+                    <div class="contact-text"></div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-text"></div>
+        </footer>
+    </div>
+</body>
+</html>
