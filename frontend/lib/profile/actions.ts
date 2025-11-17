@@ -39,12 +39,9 @@ export async function updateProfile(
     };
 
     // Use upsert to handle both insert and update cases
-    const { error } = await supabase.from("profiles").upsert(
-        updateData,
-        {
-            onConflict: "id",
-        }
-    );
+    const { error } = await supabase.from("profiles").upsert(updateData, {
+        onConflict: "id",
+    });
 
     if (error) {
         console.error("Error updating profile:", error);
@@ -160,9 +157,9 @@ export async function updateEmail(
         .single();
 
     if (existingUser) {
-        return { 
-            success: false, 
-            error: "This email is already associated with another account" 
+        return {
+            success: false,
+            error: "This email is already associated with another account",
         };
     }
 
@@ -197,13 +194,18 @@ export async function updateEmail(
         // The auth email was updated successfully
     }
 
-    // Sign out from all devices for security
-    await supabase.auth.signOut({ scope: "global" });
+    // Sign out from all devices for security BEFORE returning success
+    // This prevents session conflicts on the client side
+    try {
+        await supabase.auth.signOut({ scope: "global" });
+    } catch (signOutError) {
+        console.error("Error during sign out:", signOutError);
+        // Don't fail the operation, but log it
+    }
 
     return {
         success: true,
-        message:
-            "Check both emails for confirmation",
+        message: "Check both emails for confirmation",
     };
 }
 
@@ -262,13 +264,18 @@ export async function updatePassword(
         return { success: false, error: error.message };
     }
 
-    // Sign out from all devices for security
-    await supabase.auth.signOut({ scope: "global" });
+    // Sign out from all devices for security BEFORE returning success
+    // This prevents session conflicts on the client side
+    try {
+        await supabase.auth.signOut({ scope: "global" });
+    } catch (signOutError) {
+        console.error("Error during sign out:", signOutError);
+        // Don't fail the operation, but log it
+    }
 
     return {
         success: true,
-        message:
-            "Password updated successfully",
+        message: "Password updated successfully",
     };
 }
 
