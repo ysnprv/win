@@ -5,12 +5,18 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 export const updateSession = async (request: NextRequest) => {
+    // Check if Supabase is configured
+    if (!supabaseUrl || !supabaseKey) {
+        console.warn('Supabase environment variables not found, skipping auth middleware');
+        return NextResponse.next({ request });
+    }
+
     // Create an unmodified response
     let supabaseResponse = NextResponse.next({
         request,
     });
 
-    const supabase = createServerClient(supabaseUrl!, supabaseKey!, {
+    const supabase = createServerClient(supabaseUrl, supabaseKey, {
         cookies: {
             getAll() {
                 return request.cookies.getAll();
