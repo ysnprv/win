@@ -185,13 +185,25 @@ export async function updateEmail(
         return { success: false, error: error.message };
     }
 
+    // Update the profiles table email field
+    const { error: profileError } = await supabase
+        .from("profiles")
+        .update({ email: newEmail })
+        .eq("id", user.id);
+
+    if (profileError) {
+        console.error("Error updating profile email:", profileError);
+        // Don't fail the operation, but log the error
+        // The auth email was updated successfully
+    }
+
     // Sign out from all devices for security
     await supabase.auth.signOut({ scope: "global" });
 
     return {
         success: true,
         message:
-            "Email update initiated. Please check your new email for confirmation. You have been signed out from all devices for security.",
+            "Check both emails for confirmation",
     };
 }
 
@@ -256,7 +268,7 @@ export async function updatePassword(
     return {
         success: true,
         message:
-            "Password updated successfully. You have been signed out from all devices for security.",
+            "Password updated successfully",
     };
 }
 

@@ -82,9 +82,8 @@ export function SecurityTab({ userEmail, isOAuthUser }: SecurityTabProps) {
             const result = await updateEmail(data.newEmail, data.password);
 
             if (result.success) {
-                toast.success(result.message || "Email updated successfully", {
-                    description:
-                        "You'll be redirected to login with your new email",
+                toast.success(result.message || "Email update initiated", {
+                    description: "Redirecting to login...",
                 });
                 router.push("/login");
             } else {
@@ -110,11 +109,13 @@ export function SecurityTab({ userEmail, isOAuthUser }: SecurityTabProps) {
                 toast.success(
                     result.message || "Password updated successfully",
                     {
-                        description:
-                            "You'll be redirected to login with your new password",
+                        description: "You've been signed out for security",
                     }
                 );
-                router.push("/login");
+                // Wait a moment for the toast to show, then redirect
+                setTimeout(() => {
+                    router.push("/login");
+                }, 1500);
             } else {
                 toast.error(result.error || "Failed to update password");
             }
