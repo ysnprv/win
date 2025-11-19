@@ -39,14 +39,6 @@ class JobDBInitializer:
                 return
 
             try:
-                storage = JobStorageClient()
-
-                # If there are already jobs, nothing to do.
-                if storage.count_jobs() > 0:
-                    logger.info("Jobs DB already contains data, skipping DB populate")
-                    JobDBInitializer._initialized = True
-                    return
-
                 # Clone the repo and import JSON
                 project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
                 db_dir = Path(__file__).parent

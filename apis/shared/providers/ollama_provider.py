@@ -4,12 +4,13 @@ from typing import Optional
 
 
 class OllamaProvider(Provider):
-    def __init__(self, model_name: str = "llama3"):
+    
+    def __init__(self, model_name: str = "gpt-oss:20b"):
         self.model = model_name
         self._client = AsyncClient()
 
     async def __call__(
-        self, prompt: str, system: Optional[str] = None, **generation_args: Any
+        self, prompt: str, system: Optional[str] = None, **generation_args
     ) -> str:
         messages = []
         if system:

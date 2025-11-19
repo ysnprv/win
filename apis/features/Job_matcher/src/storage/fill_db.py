@@ -10,7 +10,7 @@ from features.Job_matcher.src.storage.job_storage import JobStorageClient
 async def import_database(input_file: str = "jobs_export.json", confirm: bool = False):
     """Import jobs from JSON file into database"""
     
-    print("📥 JOB DATABASE IMPORTER")
+    print("JOB DATABASE IMPORTER")
     print("=" * 60)
     
     try:
@@ -34,9 +34,9 @@ async def import_database(input_file: str = "jobs_export.json", confirm: bool = 
         total_jobs = export_data.get("total_jobs", 0)
         export_date = export_data.get("export_date", "unknown")
         
-        print(f"✅ Loaded export file")
-        print(f"   📅 Exported on: {export_date}")
-        print(f"   💼 Total jobs: {total_jobs}")
+        print(f"Loaded export file")
+        print(f"   Exported on: {export_date}")
+        print(f"   Total jobs: {total_jobs}")
         
         # Initialize storage client
         print(f"\n[2] Initializing database connection...")
@@ -49,12 +49,12 @@ async def import_database(input_file: str = "jobs_export.json", confirm: bool = 
         
         # Ask for confirmation if database is not empty
         if current_count > 0 and not confirm:
-            print(f"\n⚠️  Database is not empty!")
+            print(f"\nDatabase is not empty!")
             response = input(
                 f"   Continue and add {total_jobs} jobs? This will merge with existing data. (yes/no): "
             )
             if response.lower() != "yes":
-                print("❌ Import cancelled by user")
+                print("Import cancelled by user")
                 return
         
         # Import jobs
@@ -92,7 +92,7 @@ async def import_database(input_file: str = "jobs_export.json", confirm: bool = 
                     metadatas.append(job.get("metadata") or {})
                     
                 except Exception as e:
-                    print(f"   ⚠️  Error preparing job: {e}")
+                    print(f"   Error preparing job: {e}")
                     errors += 1
             
             # Add batch to collection
@@ -109,22 +109,22 @@ async def import_database(input_file: str = "jobs_export.json", confirm: bool = 
                     print(f"   Batch {batch_idx + 1}/{len(batches)}: Added {len(ids)} jobs (Total: {imported})")
                     
                 except Exception as e:
-                    print(f"   ❌ Batch {batch_idx + 1} failed: {e}")
+                    print(f"   Batch {batch_idx + 1} failed: {e}")
                     errors += len(ids)
         
         # Final summary
-        print(f"\n✅ Import completed!")
-        print(f"   ✔️  Imported: {imported} jobs")
-        print(f"   ⏭️  Skipped (duplicates): {skipped} jobs")
+        print(f"\nImport completed!")
+        print(f"   Imported: {imported} jobs")
+        print(f"   Skipped (duplicates): {skipped} jobs")
         if errors > 0:
-            print(f"   ❌ Errors: {errors} jobs")
+            print(f"   Errors: {errors} jobs")
         
         # Verify final count
         final_count = collection.count()
         print(f"\n[4] Database now contains: {final_count} jobs")
         
     except Exception as e:
-        print(f"❌ Import failed: {e}")
+        print(f"Import failed: {e}")
         import traceback
         traceback.print_exc()
 
