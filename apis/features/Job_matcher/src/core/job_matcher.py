@@ -1,14 +1,17 @@
 from typing import List, Dict
+import asyncio
 from features.Job_matcher.src.services.job.linkedin_job_fetcher import LinkedInJobFetcher
 from features.Job_matcher.src.services.job.upwork_job_fetcher import UpworkJobFetcher
 from features.Job_matcher.src.services.job.internship_fetcher import InternshipFetcher
 from features.Job_matcher.src.services.job.jsearch_fetcher import JSearchFetcher
 from features.Job_matcher.src.storage.job_storage import JobStorageClient
+from features.Job_matcher.src.storage.db_initializer import get_db_initializer
 from features.Job_matcher.src.services.profile.profile_analyzer import ProfileAnalyzer
 from features.Job_matcher.src.utils.job_converter import JobConverter
 from features.Job_matcher.src.models.job_models import JobDocument
 from features.Job_matcher.src.utils.helper import get_country_code
 from shared.helpers.logger import get_logger
+import time
 
 logger = get_logger(__name__)
 
@@ -25,6 +28,15 @@ class JobMatcher:
         self._storage = None
         self.profile_analyzer = ProfileAnalyzer(llm_provider=llm_provider)
         self.converter = JobConverter()
+
+        # Start DB initialization in the background so the first request
+        # triggers a non-blocking population of the jobs DB if empty.
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(get_db_initializer().ensure_initialized())
+        except RuntimeError:
+            # No running loop (e.g., during tests or synchronous runs) - skip
+            pass
 
     @property
     def storage(self) -> JobStorageClient:
