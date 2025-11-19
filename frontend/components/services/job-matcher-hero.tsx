@@ -81,23 +81,14 @@ export default function JobMatcherHero() {
               <div className="absolute bottom-6 right-8 flex gap-3 items-end">
                 <div className="group relative">
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-400 shadow-lg cursor-pointer transform transition-all duration-200 group-hover:scale-110" />
-                  <div className="pointer-events-none absolute -bottom-3 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all text-xs bg-foreground rounded-md px-2 py-1 text-foreground/20 dark:bg-background dark:text-muted-foreground border border-border">
-                    Tailored matches
-                  </div>
                 </div>
 
                 <div className="group relative">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-300 to-emerald-100 shadow-md cursor-pointer transform transition-all duration-200 group-hover:scale-110 dark:from-emerald-700 dark:to-emerald-500" />
-                  <div className="pointer-events-none absolute -bottom-3 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all text-xs bg-foreground rounded-md px-2 py-1 text-foreground/20 dark:bg-background dark:text-muted-foreground border border-border">
-                    Alerts & updates
-                  </div>
                 </div>
 
                 <div className="group relative">
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-sky-300 to-cyan-200 shadow cursor-pointer transform transition-all duration-200 group-hover:scale-110 dark:from-sky-700 dark:to-cyan-500" />
-                  <div className="pointer-events-none absolute -bottom-3 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all text-xs bg-foreground rounded-md px-2 py-1 text-foreground/20 dark:bg-background dark:text-muted-foreground border border-border">
-                    Fit insights
-                  </div>
                 </div>
               </div>
 
