@@ -13,10 +13,9 @@ import traceback
 import asyncio
 
 from features.Virtual_interviewer.main import (
-    handle_websocket_connection,
     handle_voice_websocket_connection,
 )
-from features.Virtual_interviewer.agent import Agent
+from features.Virtual_interviewer.agent import Agent, handle_agent_connection
 
 router = APIRouter(prefix="/virtual-interviewer", tags=["Virtual Interviewer"])
 
@@ -32,7 +31,9 @@ async def websocket_endpoint(websocket: WebSocket, persona: str = "alex_chen"):
     Connects client to the agent and handles bidirectional communication.
     Query param: persona - The persona key to use (default: alex_chen)
     """
-    await handle_websocket_connection(websocket, persona)
+    await websocket.accept()
+    # Pass the persona explicitly to the agent connection handler
+    await handle_agent_connection(websocket, persona)
 
 
 @router.websocket("/ws/voice/{persona}")

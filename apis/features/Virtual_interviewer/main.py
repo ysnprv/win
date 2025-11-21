@@ -1,4 +1,5 @@
-from fastapi import WebSocketDisconnect
+from fastapi import WebSocketDisconnect, APIRouter, WebSocket
+from features.Virtual_interviewer.agent import handle_agent_connection
 from features.Virtual_interviewer.STT_TTS import (
     transcribe_audio,
     convert_to_wav,
@@ -12,10 +13,27 @@ import asyncio
 import websockets
 from shared.helpers.logger import get_logger
 
+# Optional router for the Virtual Interviewer feature. These routes may be
+# included in the main app's router configuration if desired.
+router = APIRouter(prefix="/virtual-interviewer", tags=["Virtual Interviewer"])
+
 logger = get_logger(__name__)
 
 # Agent WebSocket URL
-AGENT_WS_URL = os.getenv("AGENT_WS_URL", "ws://localhost:8765")
+AGENT_WS_URL = os.getenv("AGENT_WS_URL", "ws://localhost:8000/virtual-interviewer/ws")
+
+
+@router.websocket("/ws/agent")
+async def agent_ws_endpoint(websocket: WebSocket):
+    """Direct WebSocket route that uses the local agent handler.
+
+    This mirrors the previous standalone agent server by allowing
+    in-process connections into the Agent. It accepts the WebSocket and
+    delegates handling to the feature's handler function.
+    """
+    await websocket.accept()
+    # The handler will extract persona/user_id from query params if present
+    await handle_agent_connection(websocket)
 
 
 async def handle_websocket_connection(websocket, persona_key: str = "alex_chen"):
@@ -23,68 +41,8 @@ async def handle_websocket_connection(websocket, persona_key: str = "alex_chen")
     await websocket.accept()
 
     try:
-        # Establish persistent connection with agent, passing persona in URL
-        # Pass through the user_id to the agent process so that the agent
-        # can associate saved interviews with the correct user. The frontend
-        # should attach `user_id` as a query param when connecting.
-        user_id = websocket.query_params.get("user_id")
-        extra = f"&user_id={user_id}" if user_id else ""
-        agent_url = f"{AGENT_WS_URL}?persona={persona_key}{extra}"
-        async with websockets.connect(
-            agent_url,
-            ping_interval=20,  # Send ping every 20 seconds
-            ping_timeout=60,  # Wait up to 60 seconds for pong
-            max_size=2**24,  # 16MB
-            max_queue=None,
-            close_timeout=None,  # No timeout for closing handshake
-        ) as agent_websocket:
-            logger.info("Connected to agent")
-
-            # Receive but DON'T forward persona announcement (it's a formatted info block)
-            persona_announcement = await agent_websocket.recv()
-            logger.info(f"Agent persona announcement received (not forwarding): {persona_announcement[:50]}...")
-
-            # Receive and FORWARD opening message (it's the interviewer's first question)
-            opening_message = await agent_websocket.recv()
-            await websocket.send_text(opening_message)
-            logger.info(f"Opening message sent to client: {opening_message[:50]}...")
-
-            # Handle bidirectional communication
-            async def forward_from_client():
-                try:
-                    while True:
-                        # Receive message from client
-                        message = await websocket.receive_text()
-                        # Log only the first 50 characters of messages to avoid exposing long answers
-                        msg_preview = (str(message).replace('\n',' ')[:50] + '...') if len(str(message)) > 50 else str(message)
-                        logger.info(f"Client message: {msg_preview}")
-
-                        # Forward to agent
-                        await agent_websocket.send(message)
-                except WebSocketDisconnect:
-                    logger.warning("Client disconnected")
-                except Exception as e:
-                    logger.error(f"Error from client: {e}")
-
-            async def forward_from_agent():
-                try:
-                    while True:
-                        # Receive response from agent
-                        response = await agent_websocket.recv()
-                        # Truncate agent responses in logs for privacy and brevity
-                        resp_preview = (str(response).replace('\n',' ')[:50] + '...') if len(str(response)) > 50 else str(response)
-                        logger.info(f"Agent response: {resp_preview}")
-
-                        # Forward to client
-                        await websocket.send_text(response)
-                except Exception as e:
-                    logger.error(f"Error from agent: {e}")
-
-            # Run both forwarding tasks concurrently
-            await asyncio.gather(
-                forward_from_client(), forward_from_agent(), return_exceptions=True
-            )
-
+        # Directly invoke the agent handler that expects a FastAPI WebSocket
+        await handle_agent_connection(websocket, persona_key)
     except WebSocketDisconnect:
         logger.warning("Client disconnected")
     except Exception as e:
@@ -92,7 +50,9 @@ async def handle_websocket_connection(websocket, persona_key: str = "alex_chen")
         await websocket.send_text(f"Connection error: {str(e)}")
 
 
-async def handle_voice_websocket_connection(websocket, persona_key: str = "alex_chen", voice_id: str = "21m00Tcm4TlvDq8ikWAM"):
+async def handle_voice_websocket_connection(
+    websocket, persona_key: str = "alex_chen", voice_id: str = "21m00Tcm4TlvDq8ikWAM"
+):
     """
     Handle voice-based virtual interviewer websocket connection.
     Processes audio input, performs STT, interacts with agent, performs TTS, and streams back.
@@ -110,16 +70,20 @@ async def handle_voice_websocket_connection(websocket, persona_key: str = "alex_
             agent_url, ping_interval=20, ping_timeout=60, max_size=2**24
         ) as agent_ws:
             logger.info("Connected to agent for voice chat")
-            
+
             # Receive but DON'T forward persona announcement (it's a formatted info block)
             persona_announcement = await agent_ws.recv()
-            logger.info(f"Agent persona announcement received (not forwarding): {persona_announcement[:50]}...")
-            
+            logger.info(
+                f"Agent persona announcement received (not forwarding): {persona_announcement[:50]}..."
+            )
+
             # Receive opening message but hold it - we'll send it as first response
             opening_message = await agent_ws.recv()
-            logger.info(f"Agent opening message received, will send as first response: {opening_message[:50]}...")
+            logger.info(
+                f"Agent opening message received, will send as first response: {opening_message[:50]}..."
+            )
             first_interaction = True
-            
+
             while True:
                 # 1) WAIT for client to send voice message (binary)
                 logger.debug("Waiting for client audio...")
@@ -153,9 +117,13 @@ async def handle_voice_websocket_connection(websocket, persona_key: str = "alex_
                 try:
                     user_text = await transcribe_audio(client_wav_bytes)
                     # Log only a preview of the transcription
-                    ut_preview = (str(user_text).replace('\n',' ')[:50] + '...') if len(str(user_text)) > 50 else str(user_text)
+                    ut_preview = (
+                        (str(user_text).replace("\n", " ")[:50] + "...")
+                        if len(str(user_text)) > 50
+                        else str(user_text)
+                    )
                     logger.info("Transcription: %s", ut_preview)
-                    
+
                     # Send transcription back to client immediately
                     await websocket.send_text(
                         json.dumps({"type": "transcription", "text": user_text})
@@ -177,7 +145,11 @@ async def handle_voice_websocket_connection(websocket, persona_key: str = "alex_
                         await agent_ws.send(user_text)
                         agent_reply_text = await agent_ws.recv()
                         # Log only the first 50 chars of agent reply
-                        ar_preview = (str(agent_reply_text).replace('\n',' ')[:50] + '...') if len(str(agent_reply_text)) > 50 else str(agent_reply_text)
+                        ar_preview = (
+                            (str(agent_reply_text).replace("\n", " ")[:50] + "...")
+                            if len(str(agent_reply_text)) > 50
+                            else str(agent_reply_text)
+                        )
                         logger.info("Agent reply: %s", ar_preview)
                     except websockets.exceptions.ConnectionClosedOK as e:
                         # Agent closed the connection cleanly (1000). Treat as a normal
@@ -189,8 +161,13 @@ async def handle_voice_websocket_connection(websocket, persona_key: str = "alex_
                             # Wait up to 5s for the agent to send final messages
                             while True:
                                 try:
-                                    extra = await asyncio.wait_for(agent_ws.recv(), timeout=0.5)
-                                    logger.info("Forwarding extra agent message after close: %s", str(extra)[:80])
+                                    extra = await asyncio.wait_for(
+                                        agent_ws.recv(), timeout=0.5
+                                    )
+                                    logger.info(
+                                        "Forwarding extra agent message after close: %s",
+                                        str(extra)[:80],
+                                    )
                                     await websocket.send_text(extra)
                                 except asyncio.TimeoutError:
                                     break
@@ -207,12 +184,16 @@ async def handle_voice_websocket_connection(websocket, persona_key: str = "alex_
                 # 5) TTS: generate audio with persona-specific voice
                 try:
                     tts_bytes = await generate_tts(agent_reply_text, voice_id)
-                    
+
                     # 6) Send response with audio and text
                     response_msg = {
                         "type": "response",
                         "text": agent_reply_text,
-                        "audio": tts_bytes.hex() if isinstance(tts_bytes, bytes) else str(tts_bytes),
+                        "audio": (
+                            tts_bytes.hex()
+                            if isinstance(tts_bytes, bytes)
+                            else str(tts_bytes)
+                        ),
                     }
                     await websocket.send_text(json.dumps(response_msg))
                     logger.info("Response sent successfully")
@@ -220,8 +201,12 @@ async def handle_voice_websocket_connection(websocket, persona_key: str = "alex_
                     # the agent might be sending (e.g., completion or report messages)
                     try:
                         while True:
-                            extra = await asyncio.wait_for(agent_ws.recv(), timeout=0.25)
-                            logger.info("Forwarding extra agent message: %s", str(extra)[:80])
+                            extra = await asyncio.wait_for(
+                                agent_ws.recv(), timeout=0.25
+                            )
+                            logger.info(
+                                "Forwarding extra agent message: %s", str(extra)[:80]
+                            )
                             await websocket.send_text(extra)
                     except asyncio.TimeoutError:
                         # Nothing else to forward right now
@@ -230,8 +215,12 @@ async def handle_voice_websocket_connection(websocket, persona_key: str = "alex_
                     # the agent might be sending (e.g., completion or report messages)
                     try:
                         while True:
-                            extra = await asyncio.wait_for(agent_ws.recv(), timeout=0.25)
-                            logger.info("Forwarding extra agent message: %s", str(extra)[:80])
+                            extra = await asyncio.wait_for(
+                                agent_ws.recv(), timeout=0.25
+                            )
+                            logger.info(
+                                "Forwarding extra agent message: %s", str(extra)[:80]
+                            )
                             await websocket.send_text(extra)
                     except asyncio.TimeoutError:
                         # Nothing else to forward right now
@@ -245,11 +234,17 @@ async def handle_voice_websocket_connection(websocket, persona_key: str = "alex_
                         "audio": None,  # No audio available
                     }
                     await websocket.send_text(json.dumps(response_msg))
-                    logger.info("Response sent successfully (text only, TTS unavailable)")
+                    logger.info(
+                        "Response sent successfully (text only, TTS unavailable)"
+                    )
                     try:
                         while True:
-                            extra = await asyncio.wait_for(agent_ws.recv(), timeout=0.25)
-                            logger.info("Forwarding extra agent message: %s", str(extra)[:80])
+                            extra = await asyncio.wait_for(
+                                agent_ws.recv(), timeout=0.25
+                            )
+                            logger.info(
+                                "Forwarding extra agent message: %s", str(extra)[:80]
+                            )
                             await websocket.send_text(extra)
                     except asyncio.TimeoutError:
                         pass

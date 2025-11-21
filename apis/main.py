@@ -243,6 +243,3 @@ app.include_router(career_guide_endpoints.router)
 app.include_router(utilities_endpoints.router)
 
 logger.info("=== All endpoint routers registered ===")
-
-
-## Removed main block: UVicorn runner is handled by docker/entrypoint

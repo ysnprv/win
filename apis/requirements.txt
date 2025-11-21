@@ -1,6 +1,7 @@
 # Web framework
 fastapi
 uvicorn
+gunicorn
 python-multipart
 
 # HTTP clients

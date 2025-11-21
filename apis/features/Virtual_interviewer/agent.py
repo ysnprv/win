@@ -1,5 +1,5 @@
 import asyncio
-import websockets
+from fastapi import WebSocket, WebSocketDisconnect
 import groq
 import os
 import nest_asyncio
@@ -298,13 +298,13 @@ class Agent:
             "max_messages", 0
         )
 
-    async def handle_connection(self, websocket):
+    async def handle_connection(self, websocket: WebSocket):
         """Handle WebSocket connection for interview session"""
         self.reset_interview_state()
 
         # Send persona introduction
         persona_announcement = self.get_persona_announcement()
-        await websocket.send(persona_announcement)
+        await websocket.send_text(persona_announcement)
         logger.info(f"Starting interview with persona: {self.current_persona['name']}")
 
         # Initialize system prompt
@@ -315,20 +315,20 @@ class Agent:
         opening_message = OPENING_MESSAGE_TEMPLATE.format(
             persona_name=self.current_persona["name"]
         )
-        await websocket.send(opening_message)
+        await websocket.send_text(opening_message)
         messages.append({"role": "assistant", "content": opening_message})
 
         while not self.interview_state["should_end"]:
             try:
-                message = await websocket.recv()
-            except websockets.ConnectionClosed:
+                message = await websocket.receive_text()
+            except WebSocketDisconnect:
                 logger.info("Connection closed by the client.")
                 break
 
             self.interview_state["message_count"] += 1
 
             if message.lower().strip() in ["/end", "/quit", "/exit", "end interview"]:
-                await websocket.send(INTERVIEW_ENDED_BY_CANDIDATE)
+                await websocket.send_text(INTERVIEW_ENDED_BY_CANDIDATE)
                 self.interview_state["should_end"] = True
                 break
 
@@ -346,7 +346,7 @@ class Agent:
             )
 
             llm_reply = response.choices[0].message.content
-            await websocket.send(llm_reply)
+            await websocket.send_text(llm_reply)
             messages.append({"role": "assistant", "content": llm_reply})
 
             if self.should_end_interview(messages):
@@ -386,10 +386,8 @@ class Agent:
                 # Notify client we saved the interview
                 if interview_id:
                     try:
-                        await websocket.send(
-                            json.dumps({"type": "interview_saved", "id": interview_id})
-                        )
-                    except websockets.ConnectionClosed:
+                        await websocket.send_json({"type": "interview_saved", "id": interview_id})
+                    except WebSocketDisconnect:
                         logger.info("Report saved but client disconnected")
                     except Exception as send_err:
                         logger.error(
@@ -398,14 +396,14 @@ class Agent:
                 else:
                     # Save failed, notify client
                     try:
-                        await websocket.send(INTERVIEW_SAVE_FAILED)
-                    except websockets.ConnectionClosed:
+                        await websocket.send_text(INTERVIEW_SAVE_FAILED)
+                    except WebSocketDisconnect:
                         pass
             except Exception as e:
                 logger.error(f"Failed to generate interview report: {e}")
                 try:
-                    await websocket.send(REPORT_GENERATION_FAILED)
-                except websockets.ConnectionClosed:
+                    await websocket.send_text(REPORT_GENERATION_FAILED)
+                except WebSocketDisconnect:
                     pass
         else:
             # Interview ended early (unintentional)—skip saving
@@ -414,20 +412,12 @@ class Agent:
             )
 
 
-async def handle_agent_connection(websocket):
+async def handle_agent_connection(websocket: WebSocket, persona_key: str | None = None):
     """Create agent instance per connection with persona from URL params"""
     try:
-        from urllib.parse import urlparse, parse_qs
-
-        # Extract path from WebSocket request
-        parsed_path = websocket.request.path
-        logger.debug(f"Connection path: {parsed_path}")
-
-        # Parse URL params
-        parsed = urlparse(parsed_path)
-        query_params = parse_qs(parsed.query)
-        persona_key = query_params.get("persona", ["alex_chen"])[0]
-        user_id = query_params.get("user_id", [None])[0]
+        # Extract persona params from FastAPI WebSocket query unless provided explicitly
+        persona_key = persona_key or websocket.query_params.get("persona", "alex_chen")
+        user_id = websocket.query_params.get("user_id")
 
         logger.info(f"New agent connection with persona: {persona_key}")
 
@@ -437,30 +427,12 @@ async def handle_agent_connection(websocket):
     except Exception as e:
         logger.error(f"Error in agent connection handler: {e}")
         try:
-            await websocket.send(f"Error: {str(e)}")
+            await websocket.send_text(f"Error: {str(e)}")
         except:
             pass
 
 
-async def start_agent_server():
-    """Start the WebSocket server"""
-    agent_ws_url = os.getenv("AGENT_WS_URL", "ws://localhost:8765")
-    from urllib.parse import urlparse
-
-    parsed = urlparse(agent_ws_url)
-    host = parsed.hostname or "localhost"
-    port = parsed.port or 8765  # Extract host and port from URL
-
-    async with websockets.serve(
-        handle_agent_connection,
-        host,
-        port,
-        ping_interval=20,
-        ping_timeout=60,
-    ):
-        logger.info(f"Agent WebSocket server started on {agent_ws_url}")
-        await asyncio.Future()
-
-
-if __name__ == "__main__":
-    asyncio.run(start_agent_server())
+# NOTE: We no longer run a standalone WebSocket server in this module; the
+# FastAPI app will expose a websocket endpoint and call `handle_agent_connection`
+# directly. This avoids binding to an additional port (e.g. 8765) which is not
+# allowed on Azure App Service.
