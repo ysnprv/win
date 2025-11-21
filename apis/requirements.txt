@@ -1,7 +1,6 @@
 # Web framework
 fastapi
 uvicorn
-gunicorn
 python-multipart
 
 # HTTP clients
@@ -33,8 +32,9 @@ chromadb
 supabase
 
 # Document parsing
+pymupdf4llm
+python-docx
 charset-normalizer
-docling
 
 # PDF generation
 fpdf2

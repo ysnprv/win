@@ -1,71 +1,16 @@
-from shared.scraping.setup_parse_models import setup
-from shared.utils.constants import DEFAULT_PATHS, IRREGULAR_FILE_EXTENSIONS
-from shared.errors.errors import SetupFailedError, ScrapingFailedError
+from shared.utils.constants import IRREGULAR_FILE_EXTENSIONS
+from shared.errors.errors import ScrapingFailedError
 
 import hashlib
 from pathlib import Path
 from charset_normalizer import from_path
 import datetime
 
-
-_SETUP_COMPLETED = False
-_GLOBAL_CONVERTER = None
-
-
-def get_converter():
-    """
-    Get or create a singleton DocumentConverter instance.
-    
-    Returns:
-        DocumentConverter: Reusable document converter with all enrichment options enabled.
-    """
-    global _GLOBAL_CONVERTER, _SETUP_COMPLETED
-    
-    if _GLOBAL_CONVERTER is None:
-        # lazy load
-        from docling.document_converter import DocumentConverter
-        from docling.datamodel.base_models import InputFormat
-        from docling.datamodel.pipeline_options import (
-            PdfPipelineOptions,
-            EasyOcrOptions,
-        )
-        from docling.datamodel.pipeline_options import smolvlm_picture_description
-        from docling.document_converter import PdfFormatOption, WordFormatOption
-        
-        # Ensure models are set up
-        if not _SETUP_COMPLETED:
-            try:
-                setup(path=DEFAULT_PATHS["parsing_models"])
-                _SETUP_COMPLETED = True
-            except Exception as e:
-                raise SetupFailedError(
-                    f"Failed to setup parsing models at {DEFAULT_PATHS['parsing_models']}: {str(e)}"
-                ) from e
-        
-        # Create pipeline options once
-        pipeline_options = PdfPipelineOptions(
-            artifacts_path=DEFAULT_PATHS["parsing_models"],
-            do_ocr=True,
-            ocr_options=EasyOcrOptions(force_full_page_ocr=True),
-        )
-        
-        # Enable enrichment features
-        pipeline_options.do_table_structure = True
-        pipeline_options.do_formula_enrichment = True
-        pipeline_options.do_code_enrichment = True
-        pipeline_options.do_picture_description = True
-        pipeline_options.generate_picture_images = True
-        pipeline_options.picture_description_options = smolvlm_picture_description
-        
-        # Create converter once and reuse
-        _GLOBAL_CONVERTER = DocumentConverter(
-            format_options={
-                InputFormat.PDF: PdfFormatOption(pipeline_options=pipeline_options),
-                InputFormat.DOCX: WordFormatOption(pipeline_options=pipeline_options),
-            }
-        )
-    
-    return _GLOBAL_CONVERTER
+# Imports for simple parsing logic
+import pymupdf4llm
+from docx import Document
+from docx.table import Table
+from docx.text.paragraph import Paragraph
 
 
 def get_hash(file_path: str) -> str:
@@ -85,7 +30,6 @@ def get_hash(file_path: str) -> str:
     return sha256_hash.hexdigest()
 
 
-# handling .txt, .md, .html resumes
 def _read_irregular_file(file_path: str, extension: str) -> str:
     """
     Read text content from non-PDF/DOCX files.
@@ -121,6 +65,74 @@ def _read_irregular_file(file_path: str, extension: str) -> str:
             raise ScrapingFailedError(f"Could not decode file {file_path}") from e
 
 
+def _table_to_markdown(table: Table) -> str:
+    """Convert a docx table to markdown format."""
+    if not table.rows:
+        return ""
+
+    lines = []
+    for row_idx, row in enumerate(table.rows):
+        cells = [cell.text.strip().replace("\n", " ") for cell in row.cells]
+        lines.append("| " + " | ".join(cells) + " |")
+
+        if row_idx == 0:
+            lines.append("| " + " | ".join(["---"] * len(cells)) + " |")
+
+    return "\n".join(lines)
+
+
+def _extract_docx(file_path: str) -> str:
+    """Extract all text content from a DOCX file including headers, footers, and tables (as markdown)."""
+    doc = Document(file_path)
+    output = []
+
+    # Headers
+    for section in doc.sections:
+        for hdr_ftr in [
+            section.header,
+            section.first_page_header,
+            section.even_page_header,
+        ]:
+            if not hdr_ftr.is_linked_to_previous:
+                for item in hdr_ftr.iter_inner_content():
+                    if isinstance(item, Paragraph):
+                        if item.text.strip():
+                            output.append(item.text)
+                    elif isinstance(item, Table):
+                        output.append(_table_to_markdown(item))
+
+    # Main body
+    for item in doc.iter_inner_content():
+        if isinstance(item, Paragraph):
+            if item.text.strip():
+                output.append(item.text)
+        elif isinstance(item, Table):
+            output.append(_table_to_markdown(item))
+
+    # Footers
+    for section in doc.sections:
+        for hdr_ftr in [
+            section.footer,
+            section.first_page_footer,
+            section.even_page_footer,
+        ]:
+            if not hdr_ftr.is_linked_to_previous:
+                for item in hdr_ftr.iter_inner_content():
+                    if isinstance(item, Paragraph):
+                        if item.text.strip():
+                            output.append(item.text)
+                    elif isinstance(item, Table):
+                        output.append(_table_to_markdown(item))
+
+    return "\n\n".join(output)
+
+
+def _extract_pdf(file_path: str) -> str:
+    """Extract text from PDF using pymupdf4llm to markdown."""
+    md = pymupdf4llm.to_markdown(file_path)
+    return md.strip()
+
+
 def scrape_file(file_path: str):
     """
     Extract text and metadata from a document file.
@@ -132,39 +144,32 @@ def scrape_file(file_path: str):
         Dictionary containing 'content' (extracted text) and 'metadata' (file info).
 
     Raises:
-        SetupFailedError: If parsing models setup fails.
         ScrapingFailedError: If file parsing fails.
     """
-    if any(Path(file_path).suffix.lower() == x for x in IRREGULAR_FILE_EXTENSIONS):
-        content = _read_irregular_file(file_path, Path(file_path).suffix.lower())
-        return {
-            "content": content,
-            "metadata": {
-                "file_path": Path(file_path).as_posix(),
-                "mod_date": datetime.datetime.fromtimestamp(
-                    Path(file_path).stat().st_mtime
-                ).isoformat(),
-                "hash": get_hash(file_path),
-            },
-        }
-
-    # Get the singleton converter (creates it on first call)
-    doc_converter = get_converter()
+    file_path_obj = Path(file_path)
+    suffix = file_path_obj.suffix.lower()
 
     try:
-        doc = doc_converter.convert(file_path).document
+        if any(suffix == x for x in IRREGULAR_FILE_EXTENSIONS):
+            content = _read_irregular_file(file_path, suffix)
+        elif suffix == ".pdf":
+            content = _extract_pdf(file_path)
+        elif suffix == ".docx":
+            content = _extract_docx(file_path)
+        else:
+            # Fallback for other types if not caught by IRREGULAR_FILE_EXTENSIONS
+            # or if they are .doc (old word) which python-docx doesn't support well directly
+            raise ScrapingFailedError(f"Unsupported file extension: {suffix}")
+
     except Exception as e:
         raise ScrapingFailedError(f"Could not parse file {file_path}") from e
-
-    # remove failed image descriptions
-    content = doc.export_to_markdown().replace("<!-- image -->", "")
 
     return {
         "content": content,
         "metadata": {
-            "file_path": Path(file_path).as_posix(),
+            "file_path": file_path_obj.as_posix(),
             "mod_date": datetime.datetime.fromtimestamp(
-                Path(file_path).stat().st_mtime
+                file_path_obj.stat().st_mtime
             ).isoformat(),
             "hash": get_hash(file_path),
         },
@@ -173,42 +178,29 @@ def scrape_file(file_path: str):
 
 def extract_text_fallback(file_path: str, filename: str) -> str:
     """
-    Fallback text extraction when advanced parsing fails.
-    Uses basic libraries that don't depend on HuggingFace.
+    Fallback text extraction.
+    Kept for backward compatibility with existing code imports,
+    though scrape_file now handles the primary logic.
     """
     import os
-    
+
     file_ext = os.path.splitext(filename)[1].lower()
-    
-    if file_ext == '.txt':
-        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+
+    if file_ext == ".txt":
+        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
             return f.read()
-    
-    elif file_ext == '.pdf':
+
+    elif file_ext == ".pdf":
         try:
-            # Try PyPDF2 for basic PDF text extraction
-            import PyPDF2
-            with open(file_path, 'rb') as f:
-                reader = PyPDF2.PdfReader(f)
-                text = ""
-                for page in reader.pages:
-                    text += page.extract_text() + "\n"
-                return text
-        except ImportError:
-            # If PyPDF2 not available, return file info
-            return f"PDF file: {filename} (Advanced parsing temporarily unavailable - please try again later)"
-    
-    elif file_ext in ['.doc', '.docx']:
+            return _extract_pdf(file_path)
+        except Exception:
+            return f"PDF file: {filename} (Parsing failed)"
+
+    elif file_ext == ".docx":
         try:
-            # Try python-docx for basic DOCX extraction
-            import docx
-            if file_ext == '.docx':
-                doc = docx.Document(file_path)
-                return '\n'.join([paragraph.text for paragraph in doc.paragraphs])
-            else:
-                return f"DOC file: {filename} (Advanced parsing temporarily unavailable - please try again later)"
-        except ImportError:
-            return f"Word document: {filename} (Advanced parsing temporarily unavailable - please try again later)"
-    
+            return _extract_docx(file_path)
+        except Exception:
+            return f"Word document: {filename} (Parsing failed)"
+
     else:
-        return f"File: {filename} (Advanced parsing temporarily unavailable - please try again later)"
+        return f"File: {filename} (Parsing unavailable)"
