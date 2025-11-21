@@ -46,11 +46,20 @@ export default function InterviewRoomPage() {
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const audioChunksRef = useRef<Blob[]>([]);
     const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+    // Prevent duplicate websocket creation (React StrictMode mounts component twice in dev)
+    const connectionActiveRef = useRef(false);
+    // Keep latest inputMode available to the socket message handler without re-running the socket effect
+    const inputModeRef = useRef<InputMode>(inputMode);
 
     useEffect(() => {
         // Initialize WebSocket connection
         const connectWebSocket = async () => {
             try {
+                // Avoid creating more than one connection (e.g., due to React Strict Mode)
+                if (connectionActiveRef.current) {
+                    console.log("WebSocket connection already active; skipping creation.");
+                    return;
+                }
                 // Prefer explicit WS base URL from env var (should include protocol: wss://)
                 // Fall back to converting API_BASE_URL for local/dev usage.
                 if (!API_WS_ENV_DEFINED) {
@@ -87,6 +96,7 @@ export default function InterviewRoomPage() {
                 console.log("Connecting to:", fullWsUrl);
                 const ws = new WebSocket(fullWsUrl);
                 wsRef.current = ws;
+                connectionActiveRef.current = true;
 
                 ws.onopen = () => {
                     console.log("Connected to interview server");
@@ -98,7 +108,7 @@ export default function InterviewRoomPage() {
                     console.log("Received message:", event.data);
 
                     // Handle voice mode responses
-                    if (inputMode === "voice") {
+                    if (inputModeRef.current === "voice") {
                         // Try to safely parse JSON — many messages are plain text (e.g., TTS text
                         // or the formatted report) so only attempt to parse when the message
                         // looks like JSON to avoid uncaught SyntaxError (Turbopack env logs parse
@@ -262,11 +272,13 @@ export default function InterviewRoomPage() {
                     console.error("WebSocket error:", error);
                     toast.error("Connection error. Please try again.");
                     setState("ended");
+                    connectionActiveRef.current = false;
                 };
 
                 ws.onclose = () => {
                     console.log("WebSocket closed");
                     setState("ended");
+                    connectionActiveRef.current = false;
                     // Show the session ended snackbar only when we are not already
                     // redirecting because the `interview_saved` handler will show it
                     // to the user before navigation.
@@ -304,8 +316,14 @@ export default function InterviewRoomPage() {
             if (window.speechSynthesis) {
                 window.speechSynthesis.cancel();
             }
+            connectionActiveRef.current = false;
         };
-    }, [inputMode, persona]);
+    }, []); // Run once on mount only; use `inputModeRef` to observe inputMode changes safely
+
+    // Update inputModeRef whenever inputMode changes without re-running the connection effect
+    useEffect(() => {
+        inputModeRef.current = inputMode;
+    }, [inputMode]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
