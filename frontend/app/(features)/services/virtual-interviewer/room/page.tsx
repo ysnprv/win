@@ -6,7 +6,12 @@ import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Mic, MicOff, Send } from "lucide-react";
 import { toast } from "sonner";
-import { API_BASE_URL } from "@/lib/constants";
+import {
+    API_BASE_URL,
+    API_WS_BASE_URL,
+    API_WS_ENV_DEFINED,
+    VIRTUAL_INTERVIEWER_WS_VOICE_PATH,
+} from "@/lib/constants";
 import { createClient as createSupabaseClient } from "@/utils/supabase/client";
 
 type InterviewState =
@@ -46,13 +51,18 @@ export default function InterviewRoomPage() {
         // Initialize WebSocket connection
         const connectWebSocket = async () => {
             try {
-                // Convert http/https URL to ws/wss
-                const wsUrl = API_BASE_URL.replace(
-                    /^https?/,
-                    API_BASE_URL.startsWith("https") ? "wss" : "ws"
-                );
+                // Prefer explicit WS base URL from env var (should include protocol: wss://)
+                // Fall back to converting API_BASE_URL for local/dev usage.
+                if (!API_WS_ENV_DEFINED) {
+                    // Log a clear warning in runtime if the production WS env var is missing.
+                    console.error(
+                        "NEXT_PUBLIC_API_URL_WS is not defined; using converted API_BASE_URL as fallback. " +
+                            "For production please set NEXT_PUBLIC_API_URL_WS to wss://<your-backend>"
+                    );
+                }
+                const wsUrl = API_WS_BASE_URL;
                 // We only connect to the voice endpoint — keep text endpoint but do not expose in UI
-                const endpoint = `/virtual-interviewer/ws/voice/${persona}`;
+                const endpoint = `${VIRTUAL_INTERVIEWER_WS_VOICE_PATH}/${persona}`;
                 // Get user id from supabase auth (if available) to forward to server
                 let userId: string | null = null;
                 try {
@@ -71,7 +81,8 @@ export default function InterviewRoomPage() {
                 const extra = userId
                     ? `?user_id=${encodeURIComponent(userId)}`
                     : "";
-                const fullWsUrl = `${wsUrl}${endpoint}${extra}`;
+                // Ensure we don't produce duplicate slashes when concatenating base + endpoint
+                const fullWsUrl = `${wsUrl.replace(/\/+$/, '')}${endpoint}${extra}`;
 
                 console.log("Connecting to:", fullWsUrl);
                 const ws = new WebSocket(fullWsUrl);
