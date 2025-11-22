@@ -167,7 +167,7 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      <div className="container mx-auto max-w-7xl px-6 space-y-8 pb-12">
+      <div className="container mx-auto max-w-7xl px-6 -mt-12 space-y-8 pb-12">
 
         {/* Latest Activity Section */}
         {!loading && (latestCV || latestGuide) && (
@@ -230,7 +230,6 @@ export default function DashboardPage() {
 
         {/* Services Grid */}
         <div className={`${!loading && !latestCV && !latestGuide ? "mt-12 md:mt-20" : ""}`}>
-          <h2 className="text-3xl font-semibold text-foreground mb-4 font-heading">Our Services</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             <ServiceCard
               href="/services/cv-rewriter"
