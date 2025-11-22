@@ -333,7 +333,7 @@ export default function PortfolioBuilderPage() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-2">
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 dark:bg-neutral-900/5 backdrop-blur-sm border border-white/10 dark:border-neutral-900/10 group-hover:bg-white/10 dark:group-hover:bg-neutral-900/10 group-hover:border-white/20 dark:group-hover:border-neutral-900/20 transition-all duration-300">
                   <span className="text-sm font-mono font-semibold text-white dark:text-neutral-900">
-                    {getSubdomainName()}.talentya-onboard.ai
+                    {getSubdomainName()}.talentya.me
                   </span>
                   <svg className="w-4 h-4 text-white dark:text-neutral-900 group-hover:translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
