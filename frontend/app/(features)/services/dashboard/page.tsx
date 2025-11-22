@@ -167,7 +167,7 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      <div className="container mx-auto max-w-7xl px-6 mt-4 space-y-8 pb-12">
+      <div className="container mx-auto max-w-7xl px-6 space-y-8 pb-12">
 
         {/* Latest Activity Section */}
         {!loading && (latestCV || latestGuide) && (
