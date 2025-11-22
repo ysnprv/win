@@ -115,7 +115,7 @@ const JobCard = ({
           )}
           
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-base mb-1 line-clamp-2 text-foreground group-hover:text-primary transition-colors leading-tight">
+            <h3 className="font-semibold text-base mb-1 line-clamp-2 text-foreground group-hover:text-primary transition-colors leading-tight break-words whitespace-normal">
               {title}
             </h3>
             <p className="text-sm text-muted-foreground font-medium">{company}</p>

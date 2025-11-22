@@ -5,8 +5,8 @@ import { Suspense } from "react";
 export default function LoginPage() {
   return (
     <div className="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
-      {/* Theme Toggle - Top Left */}
-      <div className="absolute top-4 left-4 z-50">
+      {/* Theme Toggle - Top Right */}
+      <div className="absolute top-4 right-4 z-50">
         <ThemeToggle />
       </div>
 

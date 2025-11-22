@@ -4,8 +4,8 @@ import { ThemeToggle } from "@/components/theme-toggle";
 export default function ResetPasswordPage() {
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
-      {/* Theme Toggle - Top Left */}
-      <div className="absolute top-4 left-4 z-50">
+      {/* Theme Toggle - Top Right */}
+      <div className="absolute top-4 right-4 z-50">
         <ThemeToggle />
       </div>
 

@@ -491,9 +491,9 @@ export default function JobMatcherPage() {
                     <Badge 
                       key={`${tag.type}-${tag.value}-${index}`}
                       variant="secondary" 
-                      className="cursor-pointer hover:bg-secondary/80 pr-1 gap-1"
+                      className="cursor-pointer hover:bg-secondary/80 pr-1 gap-1 whitespace-normal break-words shrink max-w-full"
                     >
-                      {tag.label}
+                      <span className="break-words whitespace-normal max-w-[12rem] truncate">{tag.label}</span>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -618,7 +618,7 @@ export default function JobMatcherPage() {
                     </Button>
 
                     {/* Page numbers */}
-                    <div className="flex gap-1">
+                    <div className="flex gap-1 flex-wrap justify-center">
                       {Array.from({ length: filteredTotalPages }, (_, idx) => idx + 1).map((p) => (
                         <Button
                           key={p}

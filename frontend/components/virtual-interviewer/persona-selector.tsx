@@ -97,11 +97,11 @@ export function PersonaSelector() {
       </div>
 
       <div className="flex flex-col items-center gap-4">
-        <div className="flex justify-center gap-4">
+        <div className="flex flex-col sm:flex-row justify-center gap-4 flex-wrap items-center sm:justify-center">
           {Object.entries(personas).slice(0, 3).map(([key, persona]) => (
             <Card
               key={key}
-              className={`relative p-5 cursor-pointer transition-all duration-300 hover:shadow-lg border-2 w-64 ${
+              className={`relative p-5 cursor-pointer transition-all duration-300 hover:shadow-lg border-2 w-full sm:w-64 max-w-full ${
               selectedPersona === key
                 ? "border-primary bg-primary/5"
                 : "border-border hover:border-primary/50"
@@ -140,15 +140,15 @@ export function PersonaSelector() {
             {/* Content */}
             <div className="space-y-3 text-center">
               <div>
-                <h4 className="font-semibold text-foreground mb-1">{persona.name}</h4>
+                <h4 className="font-semibold text-foreground mb-1 break-words whitespace-normal max-w-full">{persona.name}</h4>
                 <p className="text-xs text-muted-foreground">{persona.role}</p>
               </div>
 
               <div className="flex flex-wrap gap-1.5 justify-center">
-                <Badge variant="outline" className="text-xs">
+                <Badge variant="outline" className="text-xs whitespace-normal max-w-full break-words">
                   {persona.company}
                 </Badge>
-                <Badge variant="outline" className="text-xs">
+                <Badge variant="outline" className="text-xs whitespace-normal max-w-full break-words">
                   {persona.years_experience}+ yrs
                 </Badge>
               </div>
@@ -173,11 +173,11 @@ export function PersonaSelector() {
           </Card>
         ))}
         </div>
-        <div className="flex justify-center gap-4">
+        <div className="flex flex-col sm:flex-row justify-center gap-4 flex-wrap items-center sm:justify-center">
           {Object.entries(personas).slice(3).map(([key, persona]) => (
             <Card
               key={key}
-              className={`relative p-5 cursor-pointer transition-all duration-300 hover:shadow-lg border-2 w-64 ${
+              className={`relative p-5 cursor-pointer transition-all duration-300 hover:shadow-lg border-2 w-full sm:w-64 max-w-full ${
               selectedPersona === key
                 ? "border-primary bg-primary/5"
                 : "border-border hover:border-primary/50"
